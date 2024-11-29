@@ -36,6 +36,7 @@ void system_create(System **system, const char *name, ResourceAmount consumed, R
     (*system)->name = (char *)malloc(strlen(name) + 1);
     if((*system)->name == NULL){
         printf("Failed to allocate memory for system name \n");
+        free(*system);
         exit(0);
     }
     strcpy((*system)->name, name);
@@ -232,6 +233,7 @@ void system_array_init(SystemArray *array) {
     array->systems = (System **) malloc(array->capacity * sizeof(System *));
     if(array->systems == NULL){
         printf("Failed to allocate memory for systems");
+        free(array);
         exit(0);
     }
 }

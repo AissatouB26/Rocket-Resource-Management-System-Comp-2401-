@@ -21,6 +21,7 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
     *resource = (Resource *)malloc(sizeof(Resource));
     if(*resource == NULL){
         printf("Failed to allocate memory for resource");
+        free(*resource);
         exit(0);
     }
 
@@ -28,6 +29,7 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
     (*resource)->name = (char *)malloc(strlen(name) + 1);
     if((*resource)->name == NULL){
         printf("Failed to allocate memory for resource name \n");
+        free(*resource);
         exit(0);
     }
     strcpy((*resource)->name, name);
@@ -84,6 +86,7 @@ void resource_array_init(ResourceArray *array) {
     array->resources = (Resource **) malloc(array->capacity * sizeof(Resource *));
     if(array->resources == NULL){
         printf("Failed to allocate memory for resources");
+        free(array);
         exit(0);
     }
 }
@@ -101,6 +104,7 @@ void resource_array_clean(ResourceArray *array) {
         for(int i = 0; i < array->size; i++){
             resource_destroy(array->resources[i]);
         }
+        free(array->resources);
         free(array);
     }
 }

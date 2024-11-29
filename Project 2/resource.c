@@ -16,7 +16,27 @@
  * @param[in]  amount        Initial amount of the resource.
  * @param[in]  max_capacity  Maximum capacity of the resource.
  */
-void resource_create(Resource **resource, const char *name, int amount, int max_capacity) {}
+void resource_create(Resource **resource, const char *name, int amount, int max_capacity) {
+    //Allocate memory for the resource
+    *resource = (Resource *)malloc(sizeof(Resource));
+    if(*resource == NULL){
+        printf("Failed to allocate memory for resource");
+        exit(0);
+    }
+
+    //Allocate for the name
+    (*resource)->name = (char *)malloc(strlen(name) + 1);
+    if(*resource == NULL){
+        printf("Failed to allocate memory for resource name \n");
+        exit(0);
+    }
+    strcpy((*resource)->name, name);
+
+    //Initialize amount and max capacity
+    (*resource)->amount = amount;
+    (*resource)->max_capacity = max_capacity;
+
+}
 
 /**
  * Destroys a `Resource` object.
@@ -25,7 +45,12 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
  *
  * @param[in,out] resource  Pointer to the `Resource` to be destroyed.
  */
-void resource_destroy(Resource *resource) {}
+void resource_destroy(Resource *resource) {
+    if(resource != NULL){
+        free(resource->name);
+        free(resource);
+    } 
+}
 
 /* ResourceAmount functions */
 

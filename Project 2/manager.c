@@ -49,7 +49,7 @@ void manager_run(Manager *manager) {
     System *sys = NULL;
 
     // Update the display of the current state of things
-    display_simulation_state(manager);
+    //display_simulation_state(manager);
 
     // Process events if one is popped
     

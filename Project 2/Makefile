@@ -2,7 +2,7 @@ OPT = -Wall -Wextra -pthread
 OBJ = main.o event.o manager.o resource.o system.o
 
 program: $(OBJ)
-	gcc $(OPT) -o program $(OBJ)
+	gcc $(OPT) -g -o program $(OBJ)
 main.o: main.c defs.h
 	gcc $(OPT) -c main.c
 

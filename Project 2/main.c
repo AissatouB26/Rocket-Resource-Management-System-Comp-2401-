@@ -7,6 +7,7 @@
 void load_data(Manager *manager);
 
 int main(void) {
+    /*
     Resource *fuel;
     resource_create(&fuel, "Fuel", 1000, 1000);
 
@@ -16,7 +17,8 @@ int main(void) {
     printf("Max Capacity: %d\n", fuel->max_capacity);
 
     resource_destroy(fuel);
-    /*
+    */
+    
     Manager manager;
     manager_init(&manager);
     load_data(&manager);
@@ -29,7 +31,7 @@ int main(void) {
     }
 
     manager_clean(&manager);
-    */
+    
     return 0;
 }
 

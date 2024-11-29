@@ -31,7 +31,13 @@ void manager_init(Manager *manager) {
  *
  * @param[in,out] manager  Pointer to the `Manager` to clean.
  */
-void manager_clean(Manager *manager) {}
+void manager_clean(Manager *manager) {
+    if(manager != NULL){
+        resource_array_clean(&manager->resource_array);
+        system_array_clean(&manager->system_array);
+        free(manager);
+    }
+}
 
 /**
  * Runs the manager loop.
@@ -49,7 +55,7 @@ void manager_run(Manager *manager) {
     System *sys = NULL;
 
     // Update the display of the current state of things
-    //display_simulation_state(manager);
+    display_simulation_state(manager);
 
     // Process events if one is popped
     

@@ -24,7 +24,30 @@ static int system_store_resources(System *);
  * @param[in]  processing_time Processing time in milliseconds.
  * @param[in]  event_queue     Pointer to the `EventQueue` for event handling.
  */
-void system_create(System **system, const char *name, ResourceAmount consumed, ResourceAmount produced, int processing_time, EventQueue *event_queue) {}
+void system_create(System **system, const char *name, ResourceAmount consumed, ResourceAmount produced, int processing_time, EventQueue *event_queue) {
+    //Allocate memory for the resource
+    *system = (System *)malloc(sizeof(System));
+    if(*system == NULL){
+        printf("Failed to allocate memory for system");
+        exit(0);
+    }
+
+    //Allocate for the name
+    (*system)->name = (char *)malloc(strlen(name) + 1);
+    if((*system)->name == NULL){
+        printf("Failed to allocate memory for system name \n");
+        exit(0);
+    }
+    strcpy((*system)->name, name);
+
+    //Initialize the other attributes
+    (*system)->consumed = consumed;
+    (*system)->produced = produced;
+    (*system)->processing_time = processing_time;
+    (*system)->event_queue = event_queue;
+    (*system)->status = STANDARD;
+    (*system)->amount_stored = 0;
+}
 
 /**
  * Destroys a `System` object.
@@ -33,7 +56,12 @@ void system_create(System **system, const char *name, ResourceAmount consumed, R
  *
  * @param[in,out] system  Pointer to the `System` to be destroyed.
  */
-void system_destroy(System *system) {}
+void system_destroy(System *system) {
+    if(system != NULL){
+        free(system->name);
+        free(system);
+    }
+}
 
 
 /**
@@ -195,7 +223,18 @@ static int system_store_resources(System *system) {
  *
  * @param[out] array  Pointer to the `SystemArray` to initialize.
  */
-void system_array_init(SystemArray *array) {}
+void system_array_init(SystemArray *array) {
+    //Initialize array capacity and size
+    array->capacity = 1;
+    array->size = 0;
+
+    //Initialize systems array
+    array->systems = (System **) malloc(array->capacity * sizeof(System *));
+    if(array->systems == NULL){
+        printf("Failed to allocate memory for systems");
+        exit(0);
+    }
+}
 
 /**
  * Cleans up the `SystemArray` by destroying all systems and freeing memory.
@@ -204,7 +243,16 @@ void system_array_init(SystemArray *array) {}
  *
  * @param[in,out] array  Pointer to the `SystemArray` to clean.
  */
-void system_array_clean(SystemArray *array) {}
+void system_array_clean(SystemArray *array) {
+    if(array != NULL){
+        for(int i = 0; i < array->size; i++){
+            system_destroy(array->systems[i]);
+        }
+        free(array->systems);
+        free(array);
+    }
+}
+
 
 /**
  * Adds a `System` to the `SystemArray`, resizing if necessary (doubling the size).
@@ -215,4 +263,23 @@ void system_array_clean(SystemArray *array) {}
  * @param[in,out] array   Pointer to the `SystemArray`.
  * @param[in]     system  Pointer to the `System` to add.
  */
-void system_array_add(SystemArray *array, System *system) {}
+void system_array_add(SystemArray *array, System *system) {
+    //Resizes array if necessary
+    if(array->size == array->capacity){
+        array->capacity *= 2;
+
+        System **temp = (System **)malloc(array->capacity * sizeof(System *));
+        if(temp == NULL){
+            printf("Failed to resize system array");
+            exit(0);
+        }
+
+        memcpy(temp, array->systems, array->size * sizeof(System *));
+        free(array->systems);
+        array->systems = temp;
+    }
+
+    //Adds the system into the array
+    array->systems[array->size] = system;
+    array->size++;
+}

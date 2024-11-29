@@ -26,7 +26,7 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
 
     //Allocate for the name
     (*resource)->name = (char *)malloc(strlen(name) + 1);
-    if(*resource == NULL){
+    if((*resource)->name == NULL){
         printf("Failed to allocate memory for resource name \n");
         exit(0);
     }
@@ -75,7 +75,18 @@ void resource_amount_init(ResourceAmount *resource_amount, Resource *resource, i
  *
  * @param[out] array  Pointer to the `ResourceArray` to initialize.
  */
-void resource_array_init(ResourceArray *array) {}
+void resource_array_init(ResourceArray *array) {
+    //Initialize array capacity and size
+    array->capacity = 1;
+    array->size = 0;
+
+    //Initialize resources array
+    array->resources = (Resource **) malloc(array->capacity * sizeof(Resource *));
+    if(array->resources == NULL){
+        printf("Failed to allocate memory for resources");
+        exit(0);
+    }
+}
 
 /**
  * Cleans up the `ResourceArray` by destroying all resources and freeing memory.
@@ -85,7 +96,14 @@ void resource_array_init(ResourceArray *array) {}
  *
  * @param[in,out] array  Pointer to the `ResourceArray` to clean.
  */
-void resource_array_clean(ResourceArray *array) {}
+void resource_array_clean(ResourceArray *array) {
+    if(array != NULL){
+        for(int i = 0; i < array->size; i++){
+            resource_destroy(array->resources[i]);
+        }
+        free(array);
+    }
+}
 
 /**
  * Adds a `Resource` to the `ResourceArray`, resizing if necessary (doubling the size).
@@ -96,4 +114,23 @@ void resource_array_clean(ResourceArray *array) {}
  * @param[in,out] array     Pointer to the `ResourceArray`.
  * @param[in]     resource  Pointer to the `Resource` to add.
  */
-void resource_array_add(ResourceArray *array, Resource *resource) {}
+void resource_array_add(ResourceArray *array, Resource *resource) {
+    //Resizes array if necessary
+    if(array->size == array->capacity){
+        array->capacity *= 2;
+
+        Resource **temp = (Resource **)malloc(array->capacity * sizeof(Resource *));
+        if(temp == NULL){
+            printf("Failed to resize resource array");
+            exit(0);
+        }
+
+        memcpy(temp, array->resources, array->size * sizeof(Resource *));
+        free(array->resources);
+        array->resources = temp;
+    }
+
+    //Adds the resource into the array
+    array->resources[array->size] = resource;
+    array->size++;
+}

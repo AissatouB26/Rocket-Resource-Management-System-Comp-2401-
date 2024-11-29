@@ -33,7 +33,13 @@ void event_init(Event *event, System *system, Resource *resource, int status, in
  *
  * @param[out] queue  Pointer to the `EventQueue` to initialize.
  */
-void event_queue_init(EventQueue *queue) {}
+void event_queue_init(EventQueue *queue) {
+    if(queue == NULL){
+        printf("Error initializing EventQueue");
+        exit(0);
+    }
+    queue->head = NULL;
+}
 
 /**
  * Cleans up the `EventQueue`.
@@ -42,7 +48,12 @@ void event_queue_init(EventQueue *queue) {}
  * 
  * @param[in,out] queue  Pointer to the `EventQueue` to clean.
  */
-void event_queue_clean(EventQueue *queue) {}
+void event_queue_clean(EventQueue *queue) {
+    if(queue != NULL){
+        free(queue->head);
+        free(queue);
+    }
+}
 
 /**
  * Pushes an `Event` onto the `EventQueue`.
@@ -52,7 +63,37 @@ void event_queue_clean(EventQueue *queue) {}
  * @param[in,out] queue  Pointer to the `EventQueue`.
  * @param[in]     event  Pointer to the `Event` to push onto the queue.
  */
-void event_queue_push(EventQueue *queue, const Event *event) {}
+void event_queue_push(EventQueue *queue, const Event *event) {
+    //Null check
+    if(queue == NULL || event == NULL){
+        printf("Error pushing event.");
+        exit(0);
+    }
+
+    //Creates pointers to the current and previous node
+    EventNode *current = queue->head;
+    EventNode *previous = NULL;
+
+    //Allocates memory for new node
+    EventNode *new_node = malloc(sizeof(EventNode));
+
+    //Searches for spot to insert node
+    while(current->event.priority > event->priority){
+        previous = current;
+        current = current->next;
+    }
+
+    //Checks if event will be the new head and inserts
+    if(previous == NULL){
+        new_node->next = queue->head;
+        queue->head = new_node;
+    }
+    else{
+        previous->next = new_node;
+        new_node->next = current;
+    }
+    queue->size++;
+}
 
 /**
  * Pops an `Event` from the `EventQueue`.
@@ -64,7 +105,23 @@ void event_queue_push(EventQueue *queue, const Event *event) {}
  * @return               Non-zero if an event was successfully popped; zero otherwise.
  */
 int event_queue_pop(EventQueue *queue, Event *event) {
-    // Temporarily, this only returns 0 so that it is ignored 
-    // during early testing. Replace this with the correct logic.
-    return 0;
+    if(queue->size == 0){
+        return 0;
+    }
+    //Stores the old head event in the event parameter
+    *event = queue->head->event;
+    
+    //Creates a temp variable to store the head node
+    EventNode *temp = queue->head;
+
+    //Reassigns head
+    queue->head = queue->head->next;
+
+    //Frees the old head node
+    free(temp);
+
+    //Decreases the size of the queue
+    queue->size--;
+
+    return 1;
 }

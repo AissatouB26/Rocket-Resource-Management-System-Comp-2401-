@@ -7,18 +7,10 @@
 void load_data(Manager *manager);
 
 int main(void) {
+
+   event_test();
+   
     /*
-    Resource *fuel;
-    resource_create(&fuel, "Fuel", 1000, 1000);
-
-    printf("Resource Details:\n");
-    printf("Name: %s\n", fuel->name);
-    printf("Amount: %d\n", fuel->amount);
-    printf("Max Capacity: %d\n", fuel->max_capacity);
-
-    resource_destroy(fuel);
-    */
-    
     Manager manager;
     manager_init(&manager);
     load_data(&manager);
@@ -31,7 +23,7 @@ int main(void) {
     }
 
     manager_clean(&manager);
-    
+    */
     return 0;
 }
 
@@ -82,3 +74,61 @@ void load_data(Manager *manager) {
     system_array_add(&manager->system_array, crew_capsule_system);
     system_array_add(&manager->system_array, generator_system);
 }
+
+void event_test(){
+    // Initialize an EventQueue
+    EventQueue queue;
+    event_queue_init(&queue);
+
+    // Create dummy resources
+    Resource *resource1, *resource2;
+    resource_create(&resource1, "Resource1", 100, 200);
+    resource_create(&resource2, "Resource2", 50, 150);
+
+    // Create dummy systems
+    System *system1, *system2;
+    ResourceAmount consumed1, produced1, consumed2, produced2;
+    resource_amount_init(&consumed1, resource1, 10);
+    resource_amount_init(&produced1, resource1, 20);
+    resource_amount_init(&consumed2, resource2, 5);
+    resource_amount_init(&produced2, resource2, 15);
+
+    system_create(&system1, "System1", consumed1, produced1, 1000, &queue);
+    system_create(&system2, "System2", consumed2, produced2, 1500, &queue);
+
+    // Create and push events with different priorities
+    Event event1, event2, event3;
+    event_init(&event1, system1, resource1, STATUS_OK, PRIORITY_HIGH, 10);
+    event_init(&event2, system2, resource2, STATUS_INSUFFICIENT, PRIORITY_LOW, 5);
+    event_init(&event3, system1, resource1, STATUS_EMPTY, PRIORITY_MED, 15);
+
+    printf("Pushing events onto the queue...\n");
+    event_queue_push(&queue, &event1);
+    event_queue_push(&queue, &event2);
+    event_queue_push(&queue, &event3);
+
+    event_queue_print(&queue);
+
+    /*
+    // Pop events and display them
+    printf("\nPopping events from the queue...\n");
+    Event popped_event;
+    while (event_queue_pop(&queue, &popped_event)) {
+        printf("Popped event:\n");
+        printf("  System: %s\n", popped_event.system->name);
+        printf("  Resource: %s\n", popped_event.resource->name);
+        printf("  Status: %d\n", popped_event.status);
+        printf("  Priority: %d\n", popped_event.priority);
+        printf("  Amount: %d\n", popped_event.amount);
+    }
+    */
+    // Clean up resources and systems
+    resource_destroy(resource1);
+    resource_destroy(resource2);
+    system_destroy(system1);
+    system_destroy(system2);
+
+    // Clean up the event queue
+    event_queue_clean(&queue);
+}
+

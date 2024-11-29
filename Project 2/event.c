@@ -61,7 +61,6 @@ void event_queue_clean(EventQueue *queue) {
         queue->size = 0;
     }
 }
-
     
 
 /**
@@ -110,7 +109,6 @@ void event_queue_push(EventQueue *queue, const Event *event) {
     }
 
     queue->size++;
-    printf("Successfully added event with priority %d.\n", event->priority);
 }
 
 
@@ -124,41 +122,34 @@ void event_queue_push(EventQueue *queue, const Event *event) {
  * @return               Non-zero if an event was successfully popped; zero otherwise.
  */
 int event_queue_pop(EventQueue *queue, Event *event) {
-    if(queue == NULL || event == NULL || queue->size == 0){
-        return 0;
+    if (queue == NULL || event == NULL || queue->size == 0 || queue->head == NULL) {
+        return 0; // Safeguard for empty or improperly initialized queue
     }
-    //Stores the old head event in the event parameter
+
+    // Stores the old head event in the event parameter
     *event = queue->head->event;
-    //Creates a temp variable to store the head node
+
+    // Creates a temp variable to store the head node
     EventNode *temp = queue->head;
 
-    //Reassigns head
+    // Reassigns head
     queue->head = queue->head->next;
 
-    //Frees the old head node
+    // Frees the old head node
     free(temp);
-    
-    //Decreases the size of the queue
+
+    // Decreases the size of the queue
     queue->size--;
-    
+
+    // Optional: Ensure `head` is NULL when queue becomes empty
+    if (queue->size == 0) {
+        queue->head = NULL;
+    }
+
     return 1;
 }
 
-void event_queue_print(const EventQueue *queue) {
-    if (queue == NULL || queue->head == NULL) {
-        printf("Event queue is empty.\n");
-        return;
-    }
 
-    EventNode *current = queue->head;
-    printf("Event Queue Contents:\n");
-    while (current != NULL) {
-        const Event *event = &current->event;
-        printf("Event [Priority: %d, Status: %d, Amount: %d]\n",
-               event->priority, event->status, event->amount);
-        current = current->next;
-    }
-}
 
 // valgrind --leak-check=full -s ./program
 // valgrind --leak-check=full --track-origins=yes ./program

@@ -39,6 +39,7 @@ void event_queue_init(EventQueue *queue) {
         exit(0);
     }
     queue->head = NULL;
+    queue->size = 0;
 }
 
 /**
@@ -49,17 +50,18 @@ void event_queue_init(EventQueue *queue) {
  * @param[in,out] queue  Pointer to the `EventQueue` to clean.
  */
 void event_queue_clean(EventQueue *queue) {
-    if(queue != NULL){
+    if (queue != NULL) {
         EventNode *current = queue->head;
-        while(current != NULL) {
+        while (current != NULL) {
             EventNode *temp = current;
             current = current->next;
             free(temp);
         }
-        free(queue->head);
-        free(queue);
+        queue->head = NULL; 
+        queue->size = 0;
     }
 }
+
     
 
 /**
@@ -71,45 +73,46 @@ void event_queue_clean(EventQueue *queue) {
  * @param[in]     event  Pointer to the `Event` to push onto the queue.
  */
 void event_queue_push(EventQueue *queue, const Event *event) {
-    //Null check
-    if(queue == NULL || event == NULL){
-        printf("Error pushing event.");
+    // Null check
+    if (queue == NULL || event == NULL) {
+        printf("Error pushing event.\n");
         exit(0);
     }
 
-    //Creates pointers to the current and previous node
-    EventNode *current = queue->head;
-    EventNode *previous = NULL;
-
-    //Allocates memory for new node
+    // Allocate memory for the new node
     EventNode *new_node = malloc(sizeof(EventNode));
     if (new_node == NULL) {
         printf("Memory allocation failed for new event node\n");
-        exit(0); 
+        exit(0);
     }
+
+    // Copy the event data into the new node
+    new_node->event = *event;  // Copies all fields from the event struct
     new_node->next = NULL;
 
-    //Searches for spot to insert node
-    while(current != NULL && current->event.priority > event->priority){
+    // Find the correct spot to insert the node
+    EventNode *current = queue->head;
+    EventNode *previous = NULL;
+    while (current != NULL && current->event.priority > event->priority) {
         previous = current;
         current = current->next;
     }
-    printf("Found the spot to add it\n");
 
-    //Checks if event will be the new head and inserts
-    if(previous == NULL){
+    // Insert the new node
+    if (previous == NULL) {
+        // Insert at the head
         new_node->next = queue->head;
         queue->head = new_node;
-        printf("Added at the head!\n");
-    }
-    else{
+    } else {
+        // Insert elsewhere
         previous->next = new_node;
         new_node->next = current;
-        printf("Added somewhere else!\n");
     }
+
     queue->size++;
-    printf("Success!\n");
+    printf("Successfully added event with priority %d.\n", event->priority);
 }
+
 
 /**
  * Pops an `Event` from the `EventQueue`.
@@ -126,7 +129,6 @@ int event_queue_pop(EventQueue *queue, Event *event) {
     }
     //Stores the old head event in the event parameter
     *event = queue->head->event;
-    
     //Creates a temp variable to store the head node
     EventNode *temp = queue->head;
 
@@ -135,11 +137,10 @@ int event_queue_pop(EventQueue *queue, Event *event) {
 
     //Frees the old head node
     free(temp);
-
+    
     //Decreases the size of the queue
     queue->size--;
     
-
     return 1;
 }
 
@@ -155,7 +156,6 @@ void event_queue_print(const EventQueue *queue) {
         const Event *event = &current->event;
         printf("Event [Priority: %d, Status: %d, Amount: %d]\n",
                event->priority, event->status, event->amount);
-        // Add more fields if needed, like event->system or event->resource
         current = current->next;
     }
 }

@@ -8,9 +8,6 @@ void load_data(Manager *manager);
 
 int main(void) {
 
-   event_test();
-   
-    /*
     Manager manager;
     manager_init(&manager);
     load_data(&manager);
@@ -23,7 +20,7 @@ int main(void) {
     }
 
     manager_clean(&manager);
-    */
+    
     return 0;
 }
 
@@ -75,18 +72,18 @@ void load_data(Manager *manager) {
     system_array_add(&manager->system_array, generator_system);
 }
 
-void event_test(){
+void event_test() {
     // Initialize an EventQueue
     EventQueue queue;
     event_queue_init(&queue);
 
     // Create dummy resources
-    Resource *resource1, *resource2;
+    Resource *resource1 = NULL, *resource2 = NULL;
     resource_create(&resource1, "Resource1", 100, 200);
     resource_create(&resource2, "Resource2", 50, 150);
 
     // Create dummy systems
-    System *system1, *system2;
+    System *system1 = NULL, *system2 = NULL;
     ResourceAmount consumed1, produced1, consumed2, produced2;
     resource_amount_init(&consumed1, resource1, 10);
     resource_amount_init(&produced1, resource1, 20);
@@ -109,7 +106,6 @@ void event_test(){
 
     event_queue_print(&queue);
 
-    /*
     // Pop events and display them
     printf("\nPopping events from the queue...\n");
     Event popped_event;
@@ -121,7 +117,7 @@ void event_test(){
         printf("  Priority: %d\n", popped_event.priority);
         printf("  Amount: %d\n", popped_event.amount);
     }
-    */
+
     // Clean up resources and systems
     resource_destroy(resource1);
     resource_destroy(resource2);
@@ -131,4 +127,5 @@ void event_test(){
     // Clean up the event queue
     event_queue_clean(&queue);
 }
+
 

@@ -25,11 +25,16 @@ static int system_store_resources(System *);
  * @param[in]  event_queue     Pointer to the `EventQueue` for event handling.
  */
 void system_create(System **system, const char *name, ResourceAmount consumed, ResourceAmount produced, int processing_time, EventQueue *event_queue) {
+    if(name == NULL || system == NULL){
+        printf("Name or system is invalid");
+        return;
+    }
+    
     //Allocate memory for the resource
     *system = (System *)malloc(sizeof(System));
     if(*system == NULL){
         printf("Failed to allocate memory for system");
-        exit(0);
+        return;
     }
 
     //Allocate for the name
@@ -37,7 +42,7 @@ void system_create(System **system, const char *name, ResourceAmount consumed, R
     if((*system)->name == NULL){
         printf("Failed to allocate memory for system name \n");
         free(*system);
-        exit(0);
+        return;
     }
     strcpy((*system)->name, name);
 
@@ -61,6 +66,7 @@ void system_destroy(System *system) {
     if(system != NULL){
         free(system->name);
         free(system);
+        system = NULL;
     }
 }
 
@@ -233,8 +239,7 @@ void system_array_init(SystemArray *array) {
     array->systems = (System **) malloc(array->capacity * sizeof(System *));
     if(array->systems == NULL){
         printf("Failed to allocate memory for systems");
-        free(array);
-        exit(0);
+        return;
     }
 }
 
@@ -248,10 +253,11 @@ void system_array_init(SystemArray *array) {
 void system_array_clean(SystemArray *array) {
     if(array != NULL){
         for(int i = 0; i < array->size; i++){
-            system_destroy(array->systems[i]);
+            if(array->systems[i] != NULL){
+                system_destroy(array->systems[i]);
+            }
         }
         free(array->systems);
-        free(array);
     }
 }
 
@@ -273,7 +279,7 @@ void system_array_add(SystemArray *array, System *system) {
         System **temp = (System **)malloc(array->capacity * sizeof(System *));
         if(temp == NULL){
             printf("Failed to resize system array");
-            exit(0);
+            return;
         }
 
         memcpy(temp, array->systems, array->size * sizeof(System *));

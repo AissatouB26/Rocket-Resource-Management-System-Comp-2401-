@@ -36,7 +36,7 @@ void event_init(Event *event, System *system, Resource *resource, int status, in
 void event_queue_init(EventQueue *queue) {
     if(queue == NULL){
         printf("Error initializing EventQueue");
-        exit(0);
+        return;
     }
     queue->head = NULL;
     queue->size = 0;
@@ -55,10 +55,20 @@ void event_queue_clean(EventQueue *queue) {
         while (current != NULL) {
             EventNode *temp = current;
             current = current->next;
+
+            if(temp->event.system != NULL){
+                system_destroy(temp->event.system);
+                temp->event.system = NULL;
+            }
+
+            if(temp->event.resource != NULL){
+                resource_destroy(temp->event.resource);
+                temp->event.resource = NULL;
+            }
+            
             free(temp);
         }
-        queue->head = NULL; 
-        queue->size = 0;
+        queue->head = NULL;
     }
 }
     
@@ -75,18 +85,18 @@ void event_queue_push(EventQueue *queue, const Event *event) {
     // Null check
     if (queue == NULL || event == NULL) {
         printf("Error pushing event.\n");
-        exit(0);
+        return;
     }
 
     // Allocate memory for the new node
     EventNode *new_node = malloc(sizeof(EventNode));
     if (new_node == NULL) {
         printf("Memory allocation failed for new event node\n");
-        exit(0);
+        return;
     }
 
     // Copy the event data into the new node
-    new_node->event = *event;  // Copies all fields from the event struct
+    new_node->event = *event;  
     new_node->next = NULL;
 
     // Find the correct spot to insert the node
@@ -122,8 +132,25 @@ void event_queue_push(EventQueue *queue, const Event *event) {
  * @return               Non-zero if an event was successfully popped; zero otherwise.
  */
 int event_queue_pop(EventQueue *queue, Event *event) {
-    if (queue == NULL || event == NULL || queue->size == 0 || queue->head == NULL) {
-        return 0; // Safeguard for empty or improperly initialized queue
+    if (queue == NULL) {
+        //printf("input queue invalid.");
+        return 0; 
+    }
+
+    if(event == NULL){
+        //printf("event invalid.");
+        return 0; 
+    }
+
+    if(queue->size == 0){
+        //printf("Tried to pop from empty queue.");
+        return 0; 
+
+    }
+
+    if(queue->head == NULL){
+        //printf("The head of the queue is null.");
+        return 0; 
     }
 
     // Stores the old head event in the event parameter
@@ -141,7 +168,7 @@ int event_queue_pop(EventQueue *queue, Event *event) {
     // Decreases the size of the queue
     queue->size--;
 
-    // Optional: Ensure `head` is NULL when queue becomes empty
+    // Ensure `head` is NULL when queue becomes empty
     if (queue->size == 0) {
         queue->head = NULL;
     }

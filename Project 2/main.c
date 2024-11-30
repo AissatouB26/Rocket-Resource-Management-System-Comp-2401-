@@ -7,6 +7,8 @@
 void load_data(Manager *manager);
 
 int main(void) {
+    //event_pop_test();
+    
     Manager manager;
     manager_init(&manager);
     load_data(&manager);
@@ -19,6 +21,7 @@ int main(void) {
     }
 
     manager_clean(&manager);
+    
     return 0;
 }
 
@@ -99,37 +102,57 @@ void event_pop_test() {
     event_init(&event2, system2, resource2, STATUS_INSUFFICIENT, 1, 5);  // Low priority
     event_init(&event3, system1, resource1, STATUS_EMPTY, 2, 15);  // Medium priority
 
-    printf("Pushing events onto the queue...\n");
     event_queue_push(&queue, &event1);
     event_queue_push(&queue, &event2);
     event_queue_push(&queue, &event3);
 
-    // Print events in the queue before popping (manual print)
-    printf("\nCurrent events in the queue (before popping):\n");
-    EventNode *current = queue.head;
-    while (current != NULL) {
-        Event *event = &current->event;
-        printf("Event [Priority: %d, Status: %d, Amount: %d]\n",
-               event->priority, event->status, event->amount);
-        current = current->next;
-    }
-
-    // Pop events and verify priority
+    // Check if events are being popped correctly
     printf("\nPopping events from the queue...\n");
     Event popped_event;
-    int pop_count = 0;
-    while (event_queue_pop(&queue, &popped_event)) {
-        printf("Popped event %d:\n", ++pop_count);
-        printf("  System: %s\n", popped_event.system->name);
-        printf("  Resource: %s\n", popped_event.resource->name);
-        printf("  Status: %d\n", popped_event.status);
-        printf("  Priority: %d\n", popped_event.priority);
-        printf("  Amount: %d\n", popped_event.amount);
+
+    // First pop should return the highest priority event (Priority: 3)
+    if (event_queue_pop(&queue, &popped_event)) {
+        if (popped_event.priority == 3) {
+            printf("PASS: First pop returned highest priority event.\n");
+        } else {
+            printf("FAIL: First pop did not return highest priority event.\n");
+        }
+    } else {
+        printf("FAIL: Pop returned 0 from non-empty queue.\n");
     }
 
-    // Assert that the queue is empty after popping all events
-    assert(queue.size == 0);
-    assert(queue.head == NULL);
+    // Second pop should return the next highest priority event (Priority: 2)
+    if (event_queue_pop(&queue, &popped_event)) {
+        if (popped_event.priority == 2) {
+            printf("PASS: Second pop returned next highest priority event.\n");
+        } else {
+            printf("FAIL: Second pop did not return next highest priority event.\n");
+        }
+    } else {
+        printf("FAIL: Pop returned 0 from non-empty queue.\n");
+    }
+
+    // Third pop should return the lowest priority event (Priority: 1)
+    if (event_queue_pop(&queue, &popped_event)) {
+        if (popped_event.priority == 1) {
+            printf("PASS: Third pop returned correct event.\n");
+        } else {
+            printf("FAIL: Third pop did not return correct event.\n");
+        }
+    } else {
+        printf("FAIL: Pop returned 0 from non-empty queue.\n");
+    }
+
+    // Queue should be empty after popping all events
+    if (!event_queue_pop(&queue, &popped_event)) {
+        if (queue.head == NULL && queue.size == 0) {
+            printf("PASS: Queue is empty after popping all events.\n");
+        } else {
+            printf("FAIL: Queue is not empty after popping all events.\n");
+        }
+    } else {
+        printf("FAIL: Pop did not return 0 on empty queue.\n");
+    }
 
     // Clean up resources and systems
     resource_destroy(resource1);
@@ -141,6 +164,56 @@ void event_pop_test() {
     event_queue_clean(&queue);
 }
 
+void push_test() {
+    // Initialize an EventQueue
+    EventQueue queue;
+    event_queue_init(&queue);
+
+    // Create dummy resources
+    Resource *resource1, *resource2;
+    resource_create(&resource1, "Resource1", 100, 200);
+    resource_create(&resource2, "Resource2", 50, 150);
+
+    // Create dummy systems
+    System *system1, *system2;
+    ResourceAmount consumed1, produced1, consumed2, produced2;
+    resource_amount_init(&consumed1, resource1, 10);
+    resource_amount_init(&produced1, resource1, 20);
+    resource_amount_init(&consumed2, resource2, 5);
+    resource_amount_init(&produced2, resource2, 15);
+
+    system_create(&system1, "System1", consumed1, produced1, 1000, &queue);
+    system_create(&system2, "System2", consumed2, produced2, 1500, &queue);
+
+    // Create and push events with different priorities
+    Event event1, event2, event3;
+    event_init(&event1, system1, resource1, STATUS_OK, 3, 10);  // High priority
+    event_init(&event2, system2, resource2, STATUS_INSUFFICIENT, 1, 5);  // Low priority
+    event_init(&event3, system1, resource1, STATUS_EMPTY, 2, 15);  // Medium priority
+
+    event_queue_push(&queue, &event1);
+    event_queue_push(&queue, &event2);
+    event_queue_push(&queue, &event3);
+
+    // Directly print the event queue after pushing events
+    printf("Event Queue after pushing events:\n");
+
+    EventNode *current = queue.head;
+    while (current != NULL) {
+        printf("Event: Priority: %d, Amount: %d,  Status: %c\n", 
+                current->event.priority, current->event.amount, current->event.status);
+        current = current->next;
+    }
+
+    // Clean up resources and systems
+    resource_destroy(resource1);
+    resource_destroy(resource2);
+    system_destroy(system1);
+    system_destroy(system2);
+
+    // Clean up the event queue
+    event_queue_clean(&queue);
+}
 
 
 

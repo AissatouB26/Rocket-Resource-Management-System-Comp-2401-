@@ -51,7 +51,7 @@ typedef struct System {
     int amount_stored;
     int processing_time;
     int status; 
-    struct EventQueue *event_queue;  // Pointer to event queue shared by all systems and manager
+    struct EventQueue *event_queue;  
 } System;
 
 // Used to send notifications to the manager about an issue / state of the system
@@ -131,3 +131,5 @@ void system_array_add(SystemArray *array, System *system);
 void resource_array_init(ResourceArray *array);
 void resource_array_clean(ResourceArray *array);
 void resource_array_add(ResourceArray *array, Resource *resource);
+
+  

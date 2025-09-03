@@ -1,5 +1,4 @@
 Aissatou Barry
-101-296-710
 
 //Summary
 This project is a simulation of a resource management system for a rocket project. 
